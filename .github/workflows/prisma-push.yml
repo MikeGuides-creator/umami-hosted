@@ -9,19 +9,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-
-      - name: Install deps
-        run: npm ci
-
-      - name: Prisma DB Push
+      - name: Prisma DB Push (no lockfile needed)
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
-          PRISMA_SCHEMA_DISABLE_ADVISORY_LOCKS: 'true'
-        run: npx prisma db push --skip-generate
-
-      - name: Generate Prisma Client (optional)
-        run: npx prisma generate
+          PRISMA_SCHEMA_DISABLE_ADVISORY_LOCKS: 'true'   # keeps Prisma happy if using pooler
+        run: npx -y prisma@6.19.0 db push --skip-generate --schema=prisma/schema.prisma
