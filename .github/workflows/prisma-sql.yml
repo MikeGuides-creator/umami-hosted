@@ -1,0 +1,29 @@
+name: Generate Prisma SQL
+
+on:
+  workflow_dispatch:
+
+jobs:
+  generate-sql:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # Ensure nothing in your repo .envs interferes
+      - name: Remove repo env files (safety)
+        run: |
+          rm -f .env
+          rm -f prisma/.env
+
+      - name: Generate SQL from Prisma schema
+        run: |
+          npx -y prisma@6.19.0 migrate diff \
+            --from-empty \
+            --to-schema-datamodel prisma/schema.prisma \
+            --script > umami_schema.sql
+
+      - name: Upload SQL artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: umami-schema-sql
+          path: umami_schema.sql
