@@ -1,7 +1,5 @@
-@'
 {
   "installCommand": "corepack enable && pnpm install --frozen-lockfile",
   "buildCommand": "pnpm run build",
   "framework": null
 }
-'@ | Set-Content -Encoding UTF8 .\vercel.json
