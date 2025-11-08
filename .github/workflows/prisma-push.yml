@@ -9,13 +9,25 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # Remove prisma/.env so Prisma only reads env from the runner (and your secret)
-      - name: Remove prisma env
-        run: rm -f prisma/.env
+      # Ensure no repo env files override the secret
+      - name: Remove repo env files
+        run: |
+          rm -f .env
+          rm -f prisma/.env
 
-      - name: Prisma DB Push (no lockfile needed)
+      - name: Install psql client
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client
+
+      - name: Check DB is reachable (pg_isready)
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
-          PRISMA_SCHEMA_DISABLE_ADVISORY_LOCKS: 'true'
-        run: npx -y prisma@6.19.0 db push --skip-generate --schema=prisma/schema.prisma
+        run: |
+          node -e "const u=new URL(process.env.DATABASE_URL); console.log('Testing', u.hostname+':'+u.port)"
+          pg_isready -d "$DATABASE_URL"
 
+      - name: Prisma DB Push
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: npx -y prisma@6.19.0 db push --skip-generate --schema=prisma/schema.prisma
