@@ -19,9 +19,10 @@ type GetUserOptions = {
 };
 
 async function findUser(
-  criteria: Prisma.UserFindFirstArgs,            // <— was UserFindUniqueArgs
+  criteria: Prisma.UserFindFirstArgs | Prisma.UserFindUniqueArgs,
   options: GetUserOptions = {},
-) {
+) { /* same body as above, with findFirst */ }
+
   const { includePassword = false, showDeleted = false } = options;
 
   return prisma.client.user.findFirst({          // <— was findUnique
