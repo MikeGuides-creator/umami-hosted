@@ -14,12 +14,12 @@ model User {
   user_id    String   @id @db.Uuid @default(dbgenerated("gen_random_uuid()"))
   username   String   @db.Text @unique
   password   String   @db.Text
-  email      String?  @db.Text        // we added this column earlier; keep optional
+  email      String?  @db.Text
   role       String   @db.Text
   created_at DateTime @db.Timestamptz(6) @default(now())
   updated_at DateTime @db.Timestamptz(6) @updatedAt
 
-  @@map("user") // maps to the actual table name "user"
+  @@map("user")
 }
 
 model Website {
