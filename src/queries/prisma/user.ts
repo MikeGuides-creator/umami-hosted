@@ -10,10 +10,21 @@ export interface GetUserOptions {
   showDeleted?: boolean;
 }
 
-async function findUser(criteria: Prisma.UserFindUniqueArgs, options: GetUserOptions = {}) {
+// src/queries/prisma/user.ts
+import { Prisma } from '@prisma/client';
+
+type GetUserOptions = {
+  includePassword?: boolean;
+  showDeleted?: boolean;
+};
+
+async function findUser(
+  criteria: Prisma.UserFindFirstArgs,            // <— was UserFindUniqueArgs
+  options: GetUserOptions = {},
+) {
   const { includePassword = false, showDeleted = false } = options;
 
-  return prisma.client.user.findUnique({
+  return prisma.client.user.findFirst({          // <— was findUnique
     ...criteria,
     where: {
       ...criteria.where,
