@@ -22,38 +22,6 @@ model User {
   @@map("user") // maps to the actual table name "user"
 }
 
-model Session {
-  id         String    @id @unique @map("session_id") @db.Uuid
-  websiteId  String    @map("website_id") @db.Uuid
-  browser    String?   @db.VarChar(20)
-  os         String?   @db.VarChar(20)
-  device     String?   @db.VarChar(20)
-  screen     String?   @db.VarChar(11)
-  language   String?   @db.VarChar(35)
-  country    String?   @db.Char(2)
-  region     String?   @db.VarChar(20)
-  city       String?   @db.VarChar(50)
-  distinctId String?   @map("distinct_id") @db.VarChar(50)
-  createdAt  DateTime? @default(now()) @map("created_at") @db.Timestamptz(6)
-
-  websiteEvents WebsiteEvent[]
-  sessionData   SessionData[]
-  revenue       Revenue[]
-
-  @@index([createdAt])
-  @@index([websiteId])
-  @@index([websiteId, createdAt])
-  @@index([websiteId, createdAt, browser])
-  @@index([websiteId, createdAt, os])
-  @@index([websiteId, createdAt, device])
-  @@index([websiteId, createdAt, screen])
-  @@index([websiteId, createdAt, language])
-  @@index([websiteId, createdAt, country])
-  @@index([websiteId, createdAt, region])
-  @@index([websiteId, createdAt, city])
-  @@map("session")
-}
-
 model Website {
   id        String    @id @unique @map("website_id") @db.Uuid
   name      String    @db.VarChar(100)
