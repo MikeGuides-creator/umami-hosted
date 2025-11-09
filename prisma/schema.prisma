@@ -276,3 +276,14 @@ model Pixel {
   @@index([createdAt])
   @@map("pixel")
 }
+// minimal models so relations validate
+
+model Session {
+  id String @id @db.Uuid @default(dbgenerated("gen_random_uuid()"))
+  @@map("session")
+}
+
+model SessionData {
+  id String @id @db.Uuid @default(dbgenerated("gen_random_uuid()"))
+  @@map("session_data")
+}
