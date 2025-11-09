@@ -11,7 +11,7 @@ datasource db {
 }
 
 model User {
-  user_id    String   @id @db.Uuid @default(dbgenerated("gen_random_uuid()"))
+  id         String   @id @db.Uuid @default(dbgenerated("gen_random_uuid()")) @map("user_id")
   username   String   @db.Text @unique
   password   String   @db.Text
   email      String?  @db.Text
@@ -19,8 +19,9 @@ model User {
   created_at DateTime @db.Timestamptz(6) @default(now())
   updated_at DateTime @db.Timestamptz(6) @updatedAt
 
-  @@map("user")
+  @@map("user") // table name in Postgres is "user"
 }
+
 
 model Website {
   id        String    @id @unique @map("website_id") @db.Uuid
