@@ -124,36 +124,32 @@ model EventData {
 }
 
 model Session {
-  id          String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  websiteId   String      @db.Uuid
-  userId      String?     @db.Uuid
-  createdAt   DateTime    @default(now()) @db.Timestamptz(6)
-  updatedAt   DateTime?   @updatedAt @db.Timestamptz(6)
-  deletedAt   DateTime?   @db.Timestamptz(6)
-  website     Website     @relation(fields: [websiteId], references: [id])
-  user        User?       @relation(fields: [userId], references: [user_id])
+  id          String    @id @db.Uuid @default(dbgenerated("gen_random_uuid()"))
+  websiteId   String    @db.Uuid
+  userId      String?   @db.Uuid
+  createdAt   DateTime  @default(now()) @db.Timestamptz(6)
+  updatedAt   DateTime? @updatedAt @db.Timestamptz(6)
+  deletedAt   DateTime? @db.Timestamptz(6)
+
+  website     Website   @relation(fields: [websiteId], references: [id])
+  user        User?     @relation(fields: [userId], references: [id])
+
   eventData   EventData[]
   sessionData SessionData[]
+
+  @@map("session")
 }
 
 model SessionData {
-  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  id         String   @id @db.Uuid @default(dbgenerated("gen_random_uuid()"))
   sessionId  String   @db.Uuid
   key        String   @db.VarChar(255)
   value      String?
   createdAt  DateTime @default(now()) @db.Timestamptz(6)
+
   session    Session  @relation(fields: [sessionId], references: [id])
-}
 
-  website Website @relation(fields: [websiteId], references: [id])
-  session Session @relation(fields: [sessionId], references: [id])
-
-  @@index([createdAt])
-  @@index([websiteId])
-  @@index([sessionId])
-  @@index([sessionId, createdAt])
-  @@index([websiteId, createdAt, dataKey])
-  @@map("session")
+  @@map("session_data")
 }
 
 model Team {
