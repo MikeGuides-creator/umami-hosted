@@ -1,3 +1,4 @@
+// src/queries/prisma/user.ts
 import type { Prisma } from '@prisma/client';
 import prisma from 'lib/prisma';
 
@@ -7,32 +8,31 @@ type GetUserOptions = {
 };
 
 async function findUser(
-  criteria: Prisma.UserFindUniqueArgs,
+  criteria: Prisma.UserFindFirstArgs,
   options: GetUserOptions = {},
 ) {
   const { includePassword = false, showDeleted = false } = options;
 
-  return prisma.client.user.findUnique({
+  return prisma.client.user.findFirst({
     ...criteria,
     where: {
-      ...criteria.where,
-      // only return non-deleted users unless explicitly requested
+      ...(criteria.where || {}),
       ...(showDeleted ? {} : { deletedAt: null }),
     },
     select: {
       id: true,
       username: true,
-      password: includePassword, // only include password hash when asked
+      password: includePassword,
       role: true,
       createdAt: true,
     },
   });
 }
 
-export function getUserById(id: string, options?: GetUserOptions) {
+export function getUserById(id: string, options: GetUserOptions = {}) {
   return findUser({ where: { id } }, options);
 }
 
-export function getUserByUsername(username: string, options?: GetUserOptions) {
+export function getUserByUsername(username: string, options: GetUserOptions = {}) {
   return findUser({ where: { username } }, options);
 }
