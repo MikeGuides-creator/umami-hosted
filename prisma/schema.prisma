@@ -124,16 +124,26 @@ model EventData {
 }
 
 model Session {
-  id String @id @db.Uuid @default(dbgenerated("gen_random_uuid()"))
-  websiteId   String    @map("website_id") @db.Uuid
-  sessionId   String    @map("session_id") @db.Uuid
-  dataKey     String    @map("data_key") @db.VarChar(500)
-  stringValue String?   @map("string_value") @db.VarChar(500)
-  numberValue Decimal?  @map("number_value") @db.Decimal(19, 4)
-  dateValue   DateTime? @map("date_value") @db.Timestamptz(6)
-  dataType    Int       @map("data_type") @db.Integer
-  distinctId  String?   @map("distinct_id") @db.VarChar(50)
-  createdAt   DateTime? @default(now()) @map("created_at") @db.Timestamptz(6)
+  id          String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  websiteId   String      @db.Uuid
+  userId      String?     @db.Uuid
+  createdAt   DateTime    @default(now()) @db.Timestamptz(6)
+  updatedAt   DateTime?   @updatedAt @db.Timestamptz(6)
+  deletedAt   DateTime?   @db.Timestamptz(6)
+  website     Website     @relation(fields: [websiteId], references: [id])
+  user        User?       @relation(fields: [userId], references: [user_id])
+  eventData   EventData[]
+  sessionData SessionData[]
+}
+
+model SessionData {
+  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  sessionId  String   @db.Uuid
+  key        String   @db.VarChar(255)
+  value      String?
+  createdAt  DateTime @default(now()) @db.Timestamptz(6)
+  session    Session  @relation(fields: [sessionId], references: [id])
+}
 
   website Website @relation(fields: [websiteId], references: [id])
   session Session @relation(fields: [sessionId], references: [id])
@@ -278,7 +288,3 @@ model Pixel {
 }
 // minimal models so relations validate
 
-model SessionData {
-  id String @id @db.Uuid @default(dbgenerated("gen_random_uuid()"))
-  @@map("session_data")
-}
