@@ -42,3 +42,5 @@ yarn-error.log*
 
 *.dev.yml
 
+.remote-user.ts
+prisma/schema.backup.prisma
