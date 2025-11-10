@@ -67,7 +67,7 @@ jobs:
               TAGS="$VERSION"
             else
               # stable release: version + hierarchy + latest
-              TAGS="$VERSION,${MAJOR}.${MINOR},${MAJOR},latest"
+              TAGS="$VERSION,${MAJOR}.${MINOR},${MAJOR},postgresql-latest,latest"
             fi
           else
             # Non-tag build (e.g. from main branch)
@@ -78,14 +78,23 @@ jobs:
           echo "Computed tags: $TAGS"
 
       - name: Build and push Docker image
-        uses: docker/build-push-action@v6
-        with:
-          context: .
-          push: true
-          platforms: linux/amd64,linux/arm64
-          tags: |
-            umamisoftware/umami:${{ steps.compute.outputs.tags }}
-            ghcr.io/${{ github.repository }}:${{ steps.compute.outputs.tags }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-          provenance: false
+        run: |
+          TAGS="${{ steps.compute.outputs.tags }}"
+
+          # Set image targets conditionally
+          if [[ "${{ github.repository }}" == "umami-software/umami" ]]; then
+            IMAGES=("umamisoftware/umami" "ghcr.io/${{ github.repository }}")
+          else
+            IMAGES=("ghcr.io/${{ github.repository }}")
+          fi
+
+          for IMAGE in "${IMAGES[@]}"; do
+            echo "Building and pushing $IMAGE with tags: $TAGS"
+            docker buildx build \
+              --platform linux/amd64,linux/arm64 \
+              --push \
+              $(echo "$TAGS" | tr ',' '\n' | sed "s|^|--tag ${IMAGE}:|") \
+              --cache-from type=gha \
+              --cache-to type=gha,mode=max \
+              .
+          done
