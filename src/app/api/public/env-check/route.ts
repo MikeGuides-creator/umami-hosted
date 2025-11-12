@@ -1,24 +1,12 @@
 import { NextResponse } from "next/server";
 
 export async function GET() {
-  const raw = process.env.DATABASE_URL || "";
-  let parsed: any = {};
-  try {
-    const u = new URL(raw);
-    parsed = {
-      protocol: u.protocol,
-      host: u.hostname,
-      port: u.port,
-      db: u.pathname,
-      query: u.search,
-    };
-  } catch (e) {
-    parsed = { error: "could not parse DATABASE_URL" };
-  }
+  const dbUrl = process.env.DATABASE_URL || "not set";
+  const directUrl = process.env.DIRECT_URL || "not set";
 
+  // just show connection host info, not full secrets
   return NextResponse.json({
-    ok: true,
-    hasEnv: Boolean(raw),
-    parsed,
+    database: dbUrl.split("@")[1]?.split("/")[0],
+    direct: directUrl.split("@")[1]?.split("/")[0],
   });
 }
