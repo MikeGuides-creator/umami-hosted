@@ -1,27 +1,26 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 
-const tail = (v?: string) =>
-  v && v.includes("@") ? v.split("@")[1]?.split("/")[0] : v || "not set";
+const parse = (u?: string) => {
+  try {
+    if (!u) return { user: "unset", host: "unset" };
+    const url = new URL(u);
+    return {
+      user: decodeURIComponent(url.username || "none"),
+      host: `${url.hostname}:${url.port || "5432"}`,
+    };
+  } catch {
+    return { user: "parse-error", host: "parse-error" };
+  }
+};
 
 export async function GET() {
+  const db = parse(process.env.DATABASE_URL);
+  const direct = parse(process.env.DIRECT_URL);
+
   try {
-    // sanity probe: does the client connect at all?
-    await prisma.client.$queryRaw`SELECT 1 as ok`;
-
-    // try your real query
-    const one = await prisma.client.user.findFirst({
-      select: { id: true, username: true },
-    });
-
-    return NextResponse.json({
-      ok: true,
-      userFound: Boolean(one),
-      hosts: {
-        database: tail(process.env.DATABASE_URL),
-        direct: tail(process.env.DIRECT_URL),
-      },
-    });
+    await prisma.client.$queryRaw`select 1`;
+    return NextResponse.json({ ok: true, hosts: { db, direct } });
   } catch (e: any) {
     return NextResponse.json(
       {
@@ -29,10 +28,8 @@ export async function GET() {
         name: e?.name,
         code: e?.code,
         message: e?.message,
-        hosts: {
-          database: tail(process.env.DATABASE_URL),
-          direct: tail(process.env.DIRECT_URL),
-        },
+        hosts: { db, direct },
+        tlsEnv: process.env.NODE_TLS_REJECT_UNAUTHORIZED ?? "unset",
       },
       { status: 500 }
     );
